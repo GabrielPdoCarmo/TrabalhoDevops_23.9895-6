@@ -1,69 +1,52 @@
 {
-  "dashboard": {
-    "id": null,
-    "title": "MariaDB Metrics",
-    "tags": ["mariadb", "database"],
-    "timezone": "browser",
-    "schemaVersion": 16,
-    "version": 0,
-    "panels": [
-      {
-        "type": "graph",
-        "title": "MariaDB Connections",
-        "targets": [
-          {
-            "expr": "mysql_global_status_threads_connected",
-            "format": "time_series",
-            "intervalFactor": 1,
-            "legendFormat": "Connected Threads",
-            "refId": "A"
-          }
-        ],
-        "datasource": "Prometheus",
-        "xaxis": {
-          "show": true
-        },
-        "yaxes": [
-          {
-            "format": "short",
-            "show": true
-          },
-          {
-            "show": true
-          }
-        ]
+  "uid": "simple_dashboard",
+  "title": " Dashboard Banco de Dados DevOps",
+  "tags": ["Banco de Dados"],
+  "timezone": "browser",
+  "schemaVersion": 16,
+  "version": 1,
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Prometheus Node Status",
+      "datasource": "Prometheus",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 10
       },
-      {
-        "type": "graph",
-        "title": "MariaDB Queries per Second",
-        "targets": [
-          {
-            "expr": "rate(mysql_global_status_questions[1m])",
-            "format": "time_series",
-            "intervalFactor": 1,
-            "legendFormat": "Queries per Second",
-            "refId": "B"
-          }
-        ],
-        "datasource": "Prometheus",
-        "xaxis": {
+      "targets": [
+        {
+          "expr": "up",
+          "legendFormat": "Node {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "xaxis": {
+        "show": true
+      },
+      "yaxes": [
+        {
+          "format": "short",
           "show": true
         },
-        "yaxes": [
-          {
-            "format": "short",
-            "show": true
-          },
-          {
-            "show": true
-          }
-        ]
-      }
-    ],
-    "refresh": "5s",
-    "time": {
-      "from": "now-15m",
-      "to": "now"
+        {
+          "show": true
+        }
+      ],
+      "lines": true,
+      "fill": 1,
+      "linewidth": 2,
+      "points": false,
+      "pointradius": 2
     }
-  }
+  ],
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "overwrite": true
 }
+
