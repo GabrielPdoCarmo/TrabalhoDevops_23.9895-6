@@ -1,0 +1,13 @@
+# Dockerfile para MariaDB
+# Salve este arquivo como Dockerfile.mariadb na raiz do projeto
+
+# Dockerfile (MariaDB)
+FROM mariadb:10.5
+
+# Defina as variáveis de ambiente para o banco de dados
+ENV MYSQL_ROOT_PASSWORD=root_password
+ENV MYSQL_DATABASE=school_db
+ENV MYSQL_USER=flask_user
+ENV MYSQL_PASSWORD=flask_password
+
+EXPOSE 3306
