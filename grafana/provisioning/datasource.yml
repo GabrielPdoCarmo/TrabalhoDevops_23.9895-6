@@ -1,0 +1,11 @@
+apiVersion: 1  # Versão da API utilizada para configuração do Grafana
+
+datasources:
+  - name: Prometheus  # Nome da fonte de dados que será adicionada no Grafana
+    type: prometheus  # Tipo da fonte de dados, neste caso, Prometheus
+    access: proxy  # Tipo de acesso, 'proxy' significa que as requisições passarão pelo backend do Grafana
+    url: http://prometheus:9090  # URL para acessar o Prometheus dentro da rede do Docker
+    isDefault: true  # Define esta fonte de dados como a padrão no Grafana
+    jsonData:
+      timeInterval: 5s  # Intervalo de tempo padrão para coleta de dados
+
