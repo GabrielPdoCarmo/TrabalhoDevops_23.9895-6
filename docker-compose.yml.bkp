@@ -1,0 +1,56 @@
+version: '3.7'  # Define a versão do arquivo docker-compose
+
+services:
+  flask:  # Serviço para a aplicação Flask
+    build:
+      context: ./flask  # Contexto de build, pasta onde o Dockerfile do Flask está localizado
+      dockerfile: Dockerfile_flask  # Nome do Dockerfile para construir a imagem do Flask
+    ports:
+      - "5000:5000"  # Mapeamento de porta: expõe a porta 5000 do contêiner na porta 5000 do host
+    environment:
+      - FLASK_ENV=development  # Define a variável de ambiente para o Flask indicando que o ambiente é de desenvolvimento
+    depends_on:
+      - mariadb  # Define que o serviço Flask depende do serviço mariadb estar funcionando
+
+  mariadb:  # Serviço para o banco de dados MariaDB
+    build:
+      context: ./mariadb  # Contexto de build, pasta onde o Dockerfile do MariaDB está localizado
+      dockerfile: Dockerfile_mariadb  # Nome do Dockerfile para construir a imagem do MariaDB
+    ports:
+      - "3306:3306"  # Mapeamento de porta: expõe a porta 3306 do contêiner na porta 3306 do host
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password  # Define a senha do usuário root do MariaDB
+      MYSQL_DATABASE: school_db  # Cria um banco de dados padrão chamado 'mydb'
+      MYSQL_USER: flask_user  # Cria um usuário padrão chamado 'user'
+      MYSQL_PASSWORD: flask_password  # Define a senha para o usuário 'user'
+
+  prometheus:  # Serviço para o Prometheus, responsável pela coleta de métricas
+    image: prom/prometheus  # Usa a imagem oficial do Prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml  # Mapeia o arquivo de configuração do Prometheus para dentro do contêiner
+    ports:
+      - "9090:9090"  # Mapeamento de porta: expõe a porta 9090 do contêiner na porta 9090 do host
+    depends_on:
+      - mysqld_exporter  # Define que o serviço Prometheus depende do serviço mysqld_exporter
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"  # Define o comando para o Prometheus usar o arquivo de configuração especificado
+
+  mysqld_exporter:  # Serviço para o MySQL Exporter, que coleta métricas do MariaDB para o Prometheus
+    image: prom/mysqld-exporter  # Usa a imagem oficial do MySQL Exporter
+    ports:
+      - "9104:9104"  # Mapeamento de porta: expõe a porta 9104 do contêiner na porta 9104 do host
+    environment:
+      DATA_SOURCE_NAME: "user:password@(mariadb:3306)/"  # Configura o acesso ao banco de dados MariaDB para coletar métricas
+    depends_on:
+      - mariadb  # Define que o serviço mysqld_exporter depende do serviço mariadb estar funcionando
+
+  grafana:  # Serviço para o Grafana, responsável por visualizar as métricas
+    image: grafana/grafana  # Usa a imagem oficial do Grafana
+    ports:
+      - "3000:3000"  # Mapeamento de porta: expõe a porta 3000 do contêiner na porta 3000 do host
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning  # Mapeia a pasta de configuração do Grafana para provisionamento
+      - ./grafana/dashboards:/var/lib/grafana/dashboards  # Mapeia a pasta de dashboards do Grafana para dentro do contêiner
+    depends_on:
+      - prometheus  # Define que o serviço Grafana depende do serviço Prometheus estar funcionando
+
