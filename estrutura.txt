@@ -1,0 +1,20 @@
+├── Jenkinsfile                          # Define a pipeline de CI/CD do Jenkins (build, test, deploy, monitoramento)
+├── docker-compose.yml                   # Orquestração dos containers Docker dos serviços (Flask, MariaDB, Prometheus, Grafana)
+├── exporter                             
+│   └── mysqld_exporter.env              # Arquivo com variáveis de ambiente para conexão com o MariaDB
+├── flask                                
+│   ├── Dockerfile_flask                 # Dockerfile para criar a imagem Docker da aplicação Flask
+│   ├── app.py                           # Código principal da aplicação Flask (rotas e lógica de negócio)
+│   └── requirements.txt                 # Dependências da aplicação Flask (usado pelo pip)
+├── grafana                              
+│   ├── Dockerfile_grafana               # Dockerfile para criar a imagem Docker personalizada do Grafana
+│   ├── Dockerfile_grafana.bkp           # Backup ou versão alternativa do Dockerfile do Grafana
+│   ├── dashboards                       
+│   │   └── mariadb_dashboard.json       # Painel de monitoramento do MariaDB no Grafana
+│   └── provisioning                    
+│       ├── dashboard.yml                # Arquivo para importar automaticamente os painéis no Grafana
+│       └── datasource.yml               # Arquivo para provisionar as fontes de dados no Grafana
+├── mariadb                             
+│   └── Dockerfile_mariadb               # Dockerfile para criar a imagem Docker personalizada do MariaDB
+└── prometheus                          
+    └── prometheus.yml                   # Arquivo de configuração do Prometheus (regras de scrape e alvos)
