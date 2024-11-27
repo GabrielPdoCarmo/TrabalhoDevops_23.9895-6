@@ -45,5 +45,5 @@ def test_adicionar_aluno(client: FlaskClient):
     # Verifica se o aluno foi realmente adicionado ao banco de dados
     aluno = Aluno.query.filter_by(ra='12345').first()
     assert aluno is not None  # Verifica que o aluno foi adicionado
-    assert aluno.nome == "João"
-    assert aluno.sobrenome == "Silva"
+    assert aluno.nome == "Gabriel"
+    assert aluno.sobrenome == "Carmo"
