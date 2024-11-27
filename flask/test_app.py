@@ -19,7 +19,7 @@ def client():
 def test_listar_alunos(client: FlaskClient):
     """Testa a rota GET /alunos"""
     # Adiciona um aluno para garantir que a lista não esteja vazia
-    aluno = Aluno(nome="João", sobrenome="Silva", turma="1A", disciplinas="Matemática, Física", ra="12345")
+    aluno = Aluno(nome="Gabriel", sobrenome="Carmo", turma="9B", disciplinas="Matemática, Física", ra="12345")
     db.session.add(aluno)
     db.session.commit()
     
@@ -31,9 +31,9 @@ def test_listar_alunos(client: FlaskClient):
 def test_adicionar_aluno(client: FlaskClient):
     """Testa a rota POST /alunos"""
     new_aluno = {
-        "nome": "João",
-        "sobrenome": "Silva",
-        "turma": "1A",
+        "nome": "Gabriel",
+        "sobrenome": "Carmo",
+        "turma": "9B",
         "disciplinas": "Matemática, Física",
         "ra": "12345"
     }
