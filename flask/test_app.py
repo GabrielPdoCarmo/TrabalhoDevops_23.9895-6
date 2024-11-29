@@ -9,12 +9,7 @@ from app import app, db, Aluno  # Assumindo que seu arquivo principal é app.py
 def client():
     # Configuração do client de teste Flask
     with app.test_client() as client:
-        # Limpa o banco de dados antes de cada teste
-        db.create_all()
         yield client
-        # Limpa após o teste
-        db.session.remove()
-        db.drop_all()
 
 def test_listar_alunos(client: FlaskClient):
     """Testa a rota GET /alunos"""
