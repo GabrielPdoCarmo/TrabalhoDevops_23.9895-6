@@ -8,4 +8,3 @@ datasources:
     isDefault: true  # Define esta fonte de dados como a padrão no Grafana
     jsonData:
       timeInterval: 5s  # Intervalo de tempo padrão para coleta de dados
-
