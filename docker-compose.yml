@@ -40,9 +40,7 @@ services:
   prometheus:
     image: prom/prometheus
     volumes:
-      - type: bind
-        source: ./prometheus
-        target: /etc/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
     depends_on:
