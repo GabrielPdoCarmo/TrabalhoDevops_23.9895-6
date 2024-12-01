@@ -10,6 +10,6 @@ scrape_configs:
     static_configs:
       - targets: ["mysqld_exporter:9104"]
 
-  # - job_name: 'flask_app'
-  #   static_configs:
-  #     - targets: ['flask:5000']
+   - job_name: 'flask_app'
+     static_configs:
+       - targets: ['flask:5000']
