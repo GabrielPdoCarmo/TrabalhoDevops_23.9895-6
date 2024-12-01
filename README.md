@@ -1,7 +1,7 @@
 # Trabalho devops
 
 
-### Alunos
+### Aluno
 - Gabriel Pereira do Carmo RA: 23.98.95-6
 
 ####  Inicio
