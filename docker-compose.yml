@@ -28,14 +28,14 @@ services:
     build:
       context: ./flask
       dockerfile: Dockerfile_flask
-    command: ["pytest", "/app/test_app.py"] # Roda os testes no arquivo test_app.py
+    command: ["pytest", "/app/test_app.py"]
     depends_on:
       - mariadb
       - flask
     environment:
       - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
     networks:
-      - default # Conecta o contêiner aos mesmos serviços de rede
+      - default
 
   prometheus:
     image: prom/prometheus
@@ -57,15 +57,6 @@ services:
     depends_on:
       - mariadb
 
-  # mysqld_exporter:
-  # image: prom/mysqld-exporter
-  # ports:
-  #   - "9104:9104"
-  # environment:
-  #   DATA_SOURCE_NAME: "user:password@(mariadb:3306)/"
-  # depends_on:
-  #   - mariadb
-
   grafana:
     build:
       context: ./grafana
@@ -74,8 +65,3 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
-#    volumes:
-#      - ./grafana/provisioning:/etc/grafana/provisioning
-#      - ./grafana/dashboards:/var/lib/grafana/dashboards
-#    networks:
-#      - default
