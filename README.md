@@ -274,12 +274,233 @@ Na pasta dashboards do grafana temos o arquivo responsável por um dashboard pr�
 Arquivo:
 mariadb_dashboard.json
 
+````
+{
+  "uid": "simple_dashboard",
+  "title": "Dashboard Banco de Dados DevOps",
+  "tags": ["Banco de Dados", "DevOps"],
+  "timezone": "browser",
+  "schemaVersion": 16,
+  "version": 2,
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Prometheus Node Status",
+      "datasource": "Prometheus",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "up",
+          "legendFormat": "Node {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "xaxis": {
+        "show": true
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "show": true
+        },
+        {
+          "show": true
+        }
+      ],
+      "lines": true,
+      "fill": 1,
+      "linewidth": 2,
+      "points": false,
+      "pointradius": 2
+    },
+    {
+      "type": "graph",
+      "title": "Conexões ativas do MariaDB",
+      "datasource": "Prometheus",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "mysql_global_status_threads_connected",
+          "legendFormat": "Conexões ativas",
+          "refId": "B"
+        }
+      ],
+      "xaxis": {
+        "show": true
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "show": true
+        },
+        {
+          "show": true
+        }
+      ],
+      "lines": true,
+      "fill": 1,
+      "linewidth": 2,
+      "points": false,
+      "pointradius": 2
+    },
+    {
+      "type": "graph",
+      "title": "Uso de CPU do Prometheus",
+      "datasource": "Prometheus",
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "rate(process_cpu_seconds_total[1m])",
+          "legendFormat": "CPU Usage",
+          "refId": "C"
+        }
+      ],
+      "xaxis": {
+        "show": true
+      },
+      "yaxes": [
+        {
+          "format": "percent",
+          "show": true
+        },
+        {
+          "show": true
+        }
+      ],
+      "lines": true,
+      "fill": 1,
+      "linewidth": 2,
+      "points": false,
+      "pointradius": 2
+    },
+    {
+      "type": "graph",
+      "title": "Uso de Memória do Prometheus",
+      "datasource": "Prometheus",
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "rate(process_resident_memory_bytes[1m])",
+          "legendFormat": "Uso de Memória",
+          "refId": "D"
+        }
+      ],
+      "xaxis": {
+        "show": true
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "show": true
+        },
+        {
+          "show": true
+        }
+      ],
+      "lines": true,
+      "fill": 1,
+      "linewidth": 2,
+      "points": false,
+      "pointradius": 2
+    },
+    {
+      "type": "graph",
+      "title": "Tempo de Resposta do MariaDB",
+      "datasource": "Prometheus",
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "rate(mysql_global_status_seconds_since_slow_log[1m])",
+          "legendFormat": "Tempo de Resposta (segundos)",
+          "refId": "E"
+        }
+      ],
+      "xaxis": {
+        "show": true
+      },
+      "yaxes": [
+        {
+          "format": "seconds",
+          "show": true
+        },
+        {
+          "show": true
+        }
+      ],
+      "lines": true,
+      "fill": 1,
+      "linewidth": 2,
+      "points": false,
+      "pointradius": 2
+    }
+  ],
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "overwrite": true
+}
+````
+
 Na outra pasta, provisioning temos dois arquivos. Datasource.yml e dashboard.yml que são responsáveis por automatizar a configuração de dashboards e fontes de dados. Eles permitem que você configure essas opções automaticamente durante a inicialização do Grafana, em vez de configurá-las manualmente pela interface do usuário.
 datasource.yml
 Contém arquivos YML para configurar datasources (fontes de dados), como Prometheus, MySQL, Elasticsearch, entre outros.
+````
+apiVersion: 1  # Versão da API utilizada para configuração do Grafana
+
+datasources:
+  - name: Prometheus  # Nome da fonte de dados que será adicionada no Grafana
+    type: prometheus  # Tipo da fonte de dados, neste caso, Prometheus
+    access: proxy  # Tipo de acesso, 'proxy' significa que as requisições passarão pelo backend do Grafana
+    url: http://prometheus:9090  # URL para acessar o Prometheus dentro da rede do Docker
+    isDefault: true  # Define esta fonte de dados como a padrão no Grafana
+    jsonData:
+      timeInterval: 5s  # Intervalo de tempo padrão para coleta de dados
+
+````
 
 dashboards.yml
 Contém arquivos YML para provisionar dashboards, especificando onde estão os arquivos JSON com as definições dos dashboards.
+
+````
+apiVersion: 1
+
+providers:
+  - name: "MariaDB Dashboards"
+    orgId: 1
+    folder: ""
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards
+````
 
 Na pasta prometheus temos o arquivo prometheus.yml que é responsável pela configuração principal do Prometheus, onde são definidas configurações para:
 1 - Fontes de coleta de métricas (targets).
