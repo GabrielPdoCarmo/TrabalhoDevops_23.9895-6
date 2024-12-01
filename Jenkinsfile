@@ -5,7 +5,7 @@ pipeline {
         stage('Git Pull & Build Containers') {
             steps {
                 script {
-                    git branch: "main", url: "https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git"
+                    git branch: "master", url: "https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git"
                     sh 'docker-compose down -v'
                     sh 'docker-compose build'
                 }
