@@ -1,191 +1,77 @@
 {
   "uid": "simple_dashboard",
-  "title": "Dashboard Banco de Dados DevOps",
-  "tags": ["Banco de Dados", "DevOps"],
+  "title": "Desempenho HTTP - Métricas Padrão",
+  "tags": ["HTTP", "Prometheus", "Desempenho"],
   "timezone": "browser",
   "schemaVersion": 16,
-  "version": 2,
+  "version": 1,
   "panels": [
     {
       "type": "graph",
-      "title": "Prometheus Node Status",
+      "title": "Taxa de Requisições HTTP",
       "datasource": "Prometheus",
-      "gridPos": {
-        "x": 0,
-        "y": 0,
-        "w": 24,
-        "h": 8
-      },
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 },
       "targets": [
         {
-          "expr": "up",
-          "legendFormat": "Node {{instance}}",
+          "expr": "rate(prometheus_http_requests_total[1m])",
+          "legendFormat": "Requisições/s",
           "refId": "A"
         }
       ],
-      "xaxis": {
-        "show": true
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "show": true
-        },
-        {
-          "show": true
-        }
-      ],
       "lines": true,
-      "fill": 1,
       "linewidth": 2,
-      "points": false,
-      "pointradius": 2
+      "fill": 1
     },
     {
       "type": "graph",
-      "title": "Conexões ativas do MariaDB",
+      "title": "Latência Média de Requisições",
       "datasource": "Prometheus",
-      "gridPos": {
-        "x": 0,
-        "y": 8,
-        "w": 12,
-        "h": 8
-      },
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 },
       "targets": [
         {
-          "expr": "mysql_global_status_threads_connected",
-          "legendFormat": "Conexões ativas",
+          "expr": "rate(prometheus_http_request_duration_seconds_sum[1m]) / rate(prometheus_http_request_duration_seconds_count[1m])",
+          "legendFormat": "Latência Média (s)",
           "refId": "B"
         }
       ],
-      "xaxis": {
-        "show": true
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "show": true
-        },
-        {
-          "show": true
-        }
-      ],
       "lines": true,
-      "fill": 1,
       "linewidth": 2,
-      "points": false,
-      "pointradius": 2
+      "fill": 1
     },
     {
       "type": "graph",
-      "title": "Uso de CPU do Prometheus",
+      "title": "Requisições HTTP em Andamento",
       "datasource": "Prometheus",
-      "gridPos": {
-        "x": 12,
-        "y": 8,
-        "w": 12,
-        "h": 8
-      },
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 },
       "targets": [
         {
-          "expr": "rate(process_cpu_seconds_total[1m])",
-          "legendFormat": "CPU Usage",
+          "expr": "promhttp_metric_handler_requests_in_flight",
+          "legendFormat": "Em andamento",
           "refId": "C"
         }
       ],
-      "xaxis": {
-        "show": true
-      },
-      "yaxes": [
-        {
-          "format": "percent",
-          "show": true
-        },
-        {
-          "show": true
-        }
-      ],
       "lines": true,
-      "fill": 1,
       "linewidth": 2,
-      "points": false,
-      "pointradius": 2
+      "fill": 1
     },
     {
       "type": "graph",
-      "title": "Uso de Memória do Prometheus",
+      "title": "Requisições HTTP - Taxa de Erro",
       "datasource": "Prometheus",
-      "gridPos": {
-        "x": 0,
-        "y": 16,
-        "w": 12,
-        "h": 8
-      },
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 6 },
       "targets": [
         {
-          "expr": "rate(process_resident_memory_bytes[1m])",
-          "legendFormat": "Uso de Memória",
+          "expr": "rate(prometheus_http_requests_total{status!~'2..'}[1m])",
+          "legendFormat": "Taxa de Erro",
           "refId": "D"
         }
       ],
-      "xaxis": {
-        "show": true
-      },
-      "yaxes": [
-        {
-          "format": "bytes",
-          "show": true
-        },
-        {
-          "show": true
-        }
-      ],
       "lines": true,
-      "fill": 1,
       "linewidth": 2,
-      "points": false,
-      "pointradius": 2
-    },
-    {
-      "type": "graph",
-      "title": "Tempo de Resposta do MariaDB",
-      "datasource": "Prometheus",
-      "gridPos": {
-        "x": 12,
-        "y": 16,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "expr": "rate(mysql_global_status_seconds_since_slow_log[1m])",
-          "legendFormat": "Tempo de Resposta (segundos)",
-          "refId": "E"
-        }
-      ],
-      "xaxis": {
-        "show": true
-      },
-      "yaxes": [
-        {
-          "format": "seconds",
-          "show": true
-        },
-        {
-          "show": true
-        }
-      ],
-      "lines": true,
-      "fill": 1,
-      "linewidth": 2,
-      "points": false,
-      "pointradius": 2
+      "fill": 1
     }
   ],
   "refresh": "10s",
-  "time": {
-    "from": "now-1h",
-    "to": "now"
-  },
+  "time": { "from": "now-1h", "to": "now" },
   "overwrite": true
 }

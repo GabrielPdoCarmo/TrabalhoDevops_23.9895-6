@@ -1,45 +1,52 @@
 pipeline {
     agent any
 
+    environment {
+        REPOSITORY_URL = 'https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git'
+        BRANCH_NAME = 'master'
+    }
+
     stages {
-        stage('Git Pull & Build Containers') {
+        stage('Baixar código do Git') {
+            steps {
+                // Clonar o repositório do Git
+                git branch: "${BRANCH_NAME}", url: "${REPOSITORY_URL}"
+            }
+        }
+
+        stage('Build e Deploy') {
             steps {
                 script {
-                    git branch: "master", url: "https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git"
-                    sh 'docker-compose down -v'
-                    sh 'docker-compose build'
+                    // Construir as imagens Docker para cada serviço
+                    sh '''
+                        docker compose build
+                    '''
+
+                    // Subir os containers do Docker com Docker Compose
+                    sh '''
+                        docker compose up -d
+                    '''
                 }
             }
         }
 
-        stage('Start Containers & Run Tests') {
+        stage('Rodar Testes') {
             steps {
                 script {
-                    sh 'docker-compose up -d mariadb flask test mysqld_exporter prometheus grafana'
+                    // Rodar os testes com o pytest (ou qualquer outra ferramenta de testes que você esteja utilizando)
                     sh 'sleep 40' 
-
-                    try {
-                        sh 'docker-compose run --rm test'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error "Testes falharam. Pipeline interrompido."
-                    }
-                }
-            }
-        }
-
-        stage('Keep Application Running') {
-            steps {
-                script {
-                    sh 'docker-compose up -d mariadb flask test mysqld_exporter prometheus grafana'
+                    sh 'docker compose run --rm test'
                 }
             }
         }
     }
 
     post {
+        success {
+            echo 'Pipeline executada com sucesso!'
+        }
         failure {
-            sh 'docker-compose down -v'
+            echo 'A pipeline falhou.'
         }
     }
 }

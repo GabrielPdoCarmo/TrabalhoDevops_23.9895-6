@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   flask:
     build:
@@ -8,7 +6,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
+      - FLASK_ENV=development
     depends_on:
       - mariadb
 
@@ -24,19 +22,6 @@ services:
       MYSQL_USER: flask_user
       MYSQL_PASSWORD: flask_password
 
-  test:
-    build:
-      context: ./flask
-      dockerfile: Dockerfile_flask
-    command: ["pytest", "/app/test_app.py"]
-    depends_on:
-      - mariadb
-      - flask
-    environment:
-      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
-    networks:
-      - default
-
   prometheus:
     image: prom/prometheus
     volumes:
@@ -50,10 +35,10 @@ services:
 
   mysqld_exporter:
     image: prom/mysqld-exporter
-    environment:
-      - DATA_SOURCE_NAME=mysql://flask_user:flask_password@mariadb:3306/school_db
     ports:
       - "9104:9104"
+    environment:
+      DATA_SOURCE_NAME: "user:password@(mariadb:3306)/"
     depends_on:
       - mariadb
 
@@ -65,3 +50,16 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
+
+  test:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile_flask
+    command: ["pytest", "/app/test_app.py"]  # Roda os testes no arquivo test_app.py
+    depends_on:
+      - mariadb
+      - flask
+    environment:
+      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
+    networks:
+      - default  # Conecta o contêiner aos mesmos serviços de rede
