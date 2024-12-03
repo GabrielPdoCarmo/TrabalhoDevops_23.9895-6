@@ -1,52 +1,46 @@
 pipeline {
     agent any
 
-    environment {
-        REPOSITORY_URL = 'https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git'
-        BRANCH_NAME = 'master'
-    }
-
     stages {
-        stage('Baixar código do Git') {
+        stage('Clonar Repositório') {	
             steps {
-                // Clonar o repositório do Git
-                git branch: "${BRANCH_NAME}", url: "${REPOSITORY_URL}"
-            }
-        }
-
-        stage('Build e Deploy') {
-            steps {
-                script {
-                    // Construir as imagens Docker para cada serviço
-                    sh '''
-                        docker compose build
-                    '''
-
-                    // Subir os containers do Docker com Docker Compose
-                    sh '''
-                        docker compose up -d
-                    '''
-                }
+                git branch: 'master', url: 'https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git'
             }
         }
 
         stage('Rodar Testes') {
             steps {
+                sh 'docker-compose up -d mariadb flask test mysqld_exporter prometheus grafana'
+            }
+        }
+
+        stage('Build da Aplicação') {
+            steps {
+                  sh 'docker-compose down -v || true' // Ignorar erros se os contêineres não estiverem ativos
+                    sh 'docker-compose build'
+
+            }
+        }
+
+        stage('Criar Imagens Docker') {
+            steps {
                 script {
-                    // Rodar os testes com o pytest (ou qualquer outra ferramenta de testes que você esteja utilizando)
-                    sh 'sleep 40' 
-                    sh 'docker compose run --rm test'
+                    def appImage = docker.build('seu-usuario/seu-app')
+                    appImage.push("latest")
                 }
             }
         }
-    }
 
-    post {
-        success {
-            echo 'Pipeline executada com sucesso!'
+        stage('Deploy e Subir Ambiente') {
+            steps {
+                sh 'docker-compose down && docker-compose up -d'
+            }
         }
-        failure {
-            echo 'A pipeline falhou.'
+
+        stage('Monitorar Ambiente') {
+            steps {
+                sh 'curl http://localhost:8080/health' // Exemplo de verificação de status
+            }
         }
     }
 }
