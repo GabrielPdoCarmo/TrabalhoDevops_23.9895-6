@@ -2,40 +2,40 @@ pipeline {
     agent any
 
     environment {
-        REPOSITORY_URL = 'https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git'
-        BRANCH_NAME = 'master'
+        GIT_REPO = 'https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git'
+        GIT_BRANCH = 'master'
     }
 
     stages {
-        stage('Baixar código do Git') {
-            steps {
-                // Clonar o repositório do Git
-                git branch: "${BRANCH_NAME}", url: "${REPOSITORY_URL}"
-            }
-        }
-
-        stage('Build e Deploy') {
+        stage('Baixar o Código do Repositório') {
             steps {
                 script {
-                    // Construir as imagens Docker para cada serviço
-                    sh '''
-                        docker compose build
-                    '''
-
-                    // Subir os containers do Docker com Docker Compose
-                    sh '''
-                        docker compose up -d
-                    '''
+                    // Clonando o repositório Git
+                    git url: "${GIT_REPO}", branch: "${GIT_BRANCH}"
                 }
             }
         }
 
-        stage('Rodar Testes') {
+        stage('Construção e Inicialização') {
             steps {
                 script {
-                    // Rodar os testes com o pytest (ou qualquer outra ferramenta de testes que você esteja utilizando)
-                    sh 'sleep 40' 
-                    sh 'docker compose run --rm test'
+                    // Criando as imagens Docker para os serviços definidos
+                    sh 'docker-compose build'
+
+                    // Inicializando os containers em segundo plano
+                    sh 'docker-compose up -d'
+                }
+            }
+        }
+
+        stage('Execução dos Testes') {
+            steps {
+                script {
+                    // Aguardando os containers estarem prontos
+                    sh 'sleep 40'
+                    
+                    // Rodando os testes no container 'test'
+                    sh 'docker-compose run --rm test'
                 }
             }
         }
@@ -43,10 +43,10 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline executada com sucesso!'
+            echo 'A pipeline foi executada com sucesso!'
         }
         failure {
-            echo 'A pipeline falhou.'
+            echo 'A execução da pipeline falhou.'
         }
     }
 }
