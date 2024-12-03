@@ -1,46 +1,55 @@
 pipeline {
     agent any
 
+    environment {
+        CONTAINER_SERVICES = 'mariadb flask test mysqld_exporter prometheus grafana'
+    }
+
     stages {
-        stage('Clonar Repositório') {	
-            steps {
-                git branch: 'master', url: 'https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git'
-            }
-        }
-
-        stage('Rodar Testes') {
-            steps {
-                sh 'docker-compose up -d mariadb flask test mysqld_exporter prometheus grafana'
-            }
-        }
-
-        stage('Build da Aplicação') {
-            steps {
-                  sh 'docker-compose down -v || true' // Ignorar erros se os contêineres não estiverem ativos
-                    sh 'docker-compose build'
-
-            }
-        }
-
-        stage('Criar Imagens Docker') {
+        stage('Git Pull & Build Containers') {
             steps {
                 script {
-                    def appImage = docker.build('seu-usuario/seu-app')
-                    appImage.push("latest")
+                    git branch: "master", url: "https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git"
+                    sh 'docker-compose down -v'
+                    sh 'docker-compose build'
                 }
             }
         }
 
-        stage('Deploy e Subir Ambiente') {
+        stage('Initialize and Start Containers') {
             steps {
-                sh 'docker-compose down && docker-compose up -d'
+                script {
+                    sh "docker-compose up -d ${env.CONTAINER_SERVICES}"
+                    sh 'sleep 40'  
+                }
             }
         }
 
-        stage('Monitorar Ambiente') {
+        stage('Run Tests') {
             steps {
-                sh 'curl http://localhost:8080/health' // Exemplo de verificação de status
+                script {
+                    try {
+                        sh 'docker-compose run --rm test'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Testes falharam. Pipeline interrompido."
+                    }
+                }
             }
+        }
+
+        stage('Keep Application Running') {
+            steps {
+                script {
+                    sh 'docker-compose up -d'
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            sh 'docker-compose down -v'
         }
     }
 }
