@@ -62,4 +62,4 @@ services:
     environment:
       - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
     networks:
-      - default  # Conecta o contêiner aos mesmos serviços de rede
+      - default 
