@@ -568,26 +568,22 @@ Acesse o endereço: `http://localhost:8080`.
 
 ![Imagem Jenkins](imagens/Jenkins_1.png)  
 
-3. **Configurar o Pipeline**:  
-   - Na página de configuração do pipeline, vá até a seção **"Build Triggers"**.  
-   - Ative a opção **"Consultar periodicamente o SCM"**.  
-   - Adicione o seguinte cronograma para que o Jenkins verifique o repositório regularmente: `H/5 * * * *`.  
 
-4. **Definir o Script do Pipeline**:  
+3. **Definir o Script do Pipeline**:  
    - Role até a seção **"Pipeline"**.  
    - Selecione **"Pipeline Script from SCM"**.  
 
 ![Imagem Jenkins](imagens/Jenkins_2.png)  
 
-5. **Configurar o Repositório Git**:  
+4. **Configurar o Repositório Git**:  
    - No campo **SCM**, escolha **"Git"**.  
    - Informe o endereço do repositório do projeto:  
      `https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git`.  
 
-6. **Salvar as Alterações**:  
+5. **Salvar as Alterações**:  
    - Clique em **Salvar** para finalizar a configuração.  
 
-7. **Executar o Pipeline**  
+6. **Executar o Pipeline**  
    - Acesse a página inicial do Jenkins e localize o pipeline recém-criado.
 
    - Clique no pipeline e, em seguida, selecione a opção **"Construir Agora"** para dar início à execução.
