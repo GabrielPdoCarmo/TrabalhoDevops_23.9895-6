@@ -4,7 +4,15 @@
 ### Aluno
 - Gabriel Pereira do Carmo RA: 23.98.95-6
 
-####  Inicio
+# Rodar Projeto
+
+Para rodar o projeto, é necessário rodar o seguinte comando
+```bash
+docker-compose up --build
+```
+Caso venha ocorrer alguns erro, peço que rode novamente o comando acima
+
+####  Inicio do projeto
 O arquivo docker-compose.yml foi criado na raiz do projeto para configurar os contêineres necessários.
 
 ```bash
@@ -53,7 +61,7 @@ services:
       - default  # Conecta o contêiner aos mesmos serviços de rede
 ```
 
-Após, foi-se criada um novo diretório na raiz do projeto chamado flask, onde dentro criou-se o arquivo `app.py`.
+Após, criei uma pasta chamada `flask`, onde dentro crie o arquivo `app.py`.
 ```
 nano app.py 
 ```
@@ -158,7 +166,7 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 ```
 
-Após adicionei nossas dependencias da aplicação por meio do arquivo requirements, este ficou dentro da pasta flask também.
+Após adicionei as dependencias da aplicação por meio do arquivo `requirements`, que ficou dentro da pasta `flask` também.
 
 ```bash
 nano requirements.txt
@@ -178,7 +186,7 @@ pytest==6.2.5
 pytest-flask==1.2.0
 Flask-Testing==0.8.0
 ```
-Após criei o Dockerfile_flask dentro da pasta flask também, ele vai determinar o diretorio de trabalho e rodar a instalação das dependencias
+Após criei o `Dockerfile_flask` dentro da pasta `flask` também, onde ele vai determinar o diretorio de trabalho e rodar a instalação das dependencias
 
 ``` bash
 vim Dockerfile_flask
@@ -202,13 +210,13 @@ CMD ["flask", "run", "--host=0.0.0.0"]
 
 ```
 
-Em seguida, configurei o banco de dados. Na raiz do projeto, criei a pasta `mariadb` e adicionei o arquivo `Dockerfile_mariadb`, responsável por definir as variáveis de ambiente necessárias para o funcionamento do projeto.
+Em seguida, na raiz do projeto, criei a pasta `mariadb` e adicionei o arquivo `Dockerfile_mariadb`, responsável por definir as variáveis de ambiente necessárias para o funcionamento do projeto.
 
 ```nano
 nano Dockerfile_mariadb
 ```
 
-código: 
+Foi colocado o seguinte código: 
 
 ```  yml
 # Dockerfile para MariaDB
@@ -226,34 +234,30 @@ ENV MYSQL_PASSWORD=flask_password
 EXPOSE 3306
 ```
 
-- Após isso rodei o comando para subir os containres 
 
-```bash
-docker-compose up --build
-```
 
 - Ao confeir no navegador o localhost:5000 obitive a resultado correto:
 
 ![alt text](imagens/FAB.png)
 
-#### Jenkins
-Nesta parte, criamos uma nova tarefa no Jenkins, que será utilizada para gerenciar o pipeline do projeto "Trabalho Devops". Primeiro, inserimos o nome do item, no caso "Trabalho Devops". Em seguida, selecionamos o tipo de tarefa como Pipeline, que é ideal para projetos que demandam a execução de atividades complexas e sequenciais, como o fluxo de integração e entrega contínua (CI/CD). Depois de selecionar o tipo de tarefa, clicamos no botão "Tudo certo" para prosseguir com a configuração do pipeline.
+#### Configuração do Jenkins
+Nesta etapa, eu criei uma nova tarefa no Jenkins, que será utilizada para gerenciar o pipeline do projeto "trabalho devOps". Primeiro, defini o nome do item como "trabalho devOps". Em seguida, escolhi o tipo de tarefa como "Pipeline", pois é o mais indicado para projetos que exigem a execução de processos complexos e sequenciais, como o fluxo de integração e entrega contínua (CI/CD). Depois de selecionar o tipo de tarefa, cliquei no botão "Confirmar" para prosseguir com a configuração do pipeline.
 
-![alt text](imagens/Jenkinsfile.png)
+![alt text](imagens/Jenkins_1.png)
 
-Em seguida, configuramos o pipeline no Jenkins para conectar ao repositório Git onde está armazenado o código do projeto "Trabalho Devops".
+Em seguida, configurei o pipeline no Jenkins para conectar ao repositório Git onde está armazenado o código do projeto "Trabalho DevOps".
 
+No campo SCM, selecionei Git como o sistema de controle de versão.  
+No campo Repository URL, inseri o link para o repositório do GitHub: https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git.  
+Como não foram configuradas credenciais específicas, deixei o campo Credentials como - none -. Caso o repositório fosse privado, seria necessário adicionar credenciais para autenticação.  
 
-No campo SCM, selecionamos Git como o sistema de controle de versão.
-No campo Repository URL, inserimos o link para o repositório do GitHub: https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git.
-Como não foram configuradas credenciais específicas, deixamos o campo Credentials como - none -. Caso o repositório fosse privado, seria necessário adicionar credenciais para autenticação.
-No campo Branches to build, especificamos a branch que será usada para as builds, no caso */master. Isso indica que o pipeline será executado na branch principal.
+No campo Branches to build, especifiquei a branch que seria usada para as builds, no caso */master. Isso indica que o pipeline será executado na branch principal.
 
-![alt text](imagens/Jenkinsfile2.png)
+![alt text](imagens/Jenkins_2.png)
 
 ### Desenvolvimento do Grafana e Prometheus
 Adicionada as pastas grafana e prometheus aos arquivos.
-Na pasta grafana o arquivo Dockerfile_grafana fica responsável por crir a imagem Docker personalizada para o serviço Grafana. Ela define como configurar o ambiente, adicionando configurações específicas, plugins e integrações necessárias para funcionar no contexto da aplicação.
+Na pasta `grafana` o arquivo `Dockerfile_grafana` fica responsável por crir a imagem Docker personalizada para o serviço Grafana. Ela define como configurar o ambiente, adicionando configurações específicas, plugins e integrações necessárias para funcionar no contexto da aplicação.
 Código:
 ```  yml
 FROM grafana/grafana:latest
@@ -270,207 +274,92 @@ RUN chown -R 472:472 /etc/grafana/provisioning
 
 USER grafana
 ```
-Na pasta dashboards do grafana temos o arquivo responsável por um dashboard pré-configurado que contém a definição de painéis e métricas específicas para monitorar um banco de dados MariaDB. Ele define os painéis, métricas monitoradas e integração com datasources.
+Na pasta `dashboards` do Grafana, temos o arquivo responsável por um dashboard pré-configurado, que contém a definição de painéis e métricas específicas para monitorar um banco de dados MariaDB. Ele define os painéis, as métricas monitoradas e a integração com os datasources.
 Arquivo:
-mariadb_dashboard.json
+`mariadb_dashboard.json`
 
 ````
-{
+ {
   "uid": "simple_dashboard",
-  "title": "Dashboard Banco de Dados DevOps",
-  "tags": ["Banco de Dados", "DevOps"],
+  "title": "Desempenho HTTP - Métricas Padrão",
+  "tags": ["HTTP", "Prometheus", "Desempenho"],
   "timezone": "browser",
   "schemaVersion": 16,
-  "version": 2,
+  "version": 1,
   "panels": [
     {
       "type": "graph",
-      "title": "Prometheus Node Status",
+      "title": "Taxa de Requisições HTTP",
       "datasource": "Prometheus",
-      "gridPos": {
-        "x": 0,
-        "y": 0,
-        "w": 24,
-        "h": 8
-      },
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 },
       "targets": [
         {
-          "expr": "up",
-          "legendFormat": "Node {{instance}}",
+          "expr": "rate(prometheus_http_requests_total[1m])",
+          "legendFormat": "Requisições/s",
           "refId": "A"
         }
       ],
-      "xaxis": {
-        "show": true
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "show": true
-        },
-        {
-          "show": true
-        }
-      ],
       "lines": true,
-      "fill": 1,
       "linewidth": 2,
-      "points": false,
-      "pointradius": 2
+      "fill": 1
     },
     {
       "type": "graph",
-      "title": "Conexões ativas do MariaDB",
+      "title": "Latência Média de Requisições",
       "datasource": "Prometheus",
-      "gridPos": {
-        "x": 0,
-        "y": 8,
-        "w": 12,
-        "h": 8
-      },
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 },
       "targets": [
         {
-          "expr": "mysql_global_status_threads_connected",
-          "legendFormat": "Conexões ativas",
+          "expr": "rate(prometheus_http_request_duration_seconds_sum[1m]) / rate(prometheus_http_request_duration_seconds_count[1m])",
+          "legendFormat": "Latência Média (s)",
           "refId": "B"
         }
       ],
-      "xaxis": {
-        "show": true
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "show": true
-        },
-        {
-          "show": true
-        }
-      ],
       "lines": true,
-      "fill": 1,
       "linewidth": 2,
-      "points": false,
-      "pointradius": 2
+      "fill": 1
     },
     {
       "type": "graph",
-      "title": "Uso de CPU do Prometheus",
+      "title": "Requisições HTTP em Andamento",
       "datasource": "Prometheus",
-      "gridPos": {
-        "x": 12,
-        "y": 8,
-        "w": 12,
-        "h": 8
-      },
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 },
       "targets": [
         {
-          "expr": "rate(process_cpu_seconds_total[1m])",
-          "legendFormat": "CPU Usage",
+          "expr": "promhttp_metric_handler_requests_in_flight",
+          "legendFormat": "Em andamento",
           "refId": "C"
         }
       ],
-      "xaxis": {
-        "show": true
-      },
-      "yaxes": [
-        {
-          "format": "percent",
-          "show": true
-        },
-        {
-          "show": true
-        }
-      ],
       "lines": true,
-      "fill": 1,
       "linewidth": 2,
-      "points": false,
-      "pointradius": 2
+      "fill": 1
     },
     {
       "type": "graph",
-      "title": "Uso de Memória do Prometheus",
+      "title": "Requisições HTTP - Taxa de Erro",
       "datasource": "Prometheus",
-      "gridPos": {
-        "x": 0,
-        "y": 16,
-        "w": 12,
-        "h": 8
-      },
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 6 },
       "targets": [
         {
-          "expr": "rate(process_resident_memory_bytes[1m])",
-          "legendFormat": "Uso de Memória",
+          "expr": "rate(prometheus_http_requests_total{status!~'2..'}[1m])",
+          "legendFormat": "Taxa de Erro",
           "refId": "D"
         }
       ],
-      "xaxis": {
-        "show": true
-      },
-      "yaxes": [
-        {
-          "format": "bytes",
-          "show": true
-        },
-        {
-          "show": true
-        }
-      ],
       "lines": true,
-      "fill": 1,
       "linewidth": 2,
-      "points": false,
-      "pointradius": 2
-    },
-    {
-      "type": "graph",
-      "title": "Tempo de Resposta do MariaDB",
-      "datasource": "Prometheus",
-      "gridPos": {
-        "x": 12,
-        "y": 16,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "expr": "rate(mysql_global_status_seconds_since_slow_log[1m])",
-          "legendFormat": "Tempo de Resposta (segundos)",
-          "refId": "E"
-        }
-      ],
-      "xaxis": {
-        "show": true
-      },
-      "yaxes": [
-        {
-          "format": "seconds",
-          "show": true
-        },
-        {
-          "show": true
-        }
-      ],
-      "lines": true,
-      "fill": 1,
-      "linewidth": 2,
-      "points": false,
-      "pointradius": 2
+      "fill": 1
     }
   ],
   "refresh": "10s",
-  "time": {
-    "from": "now-1h",
-    "to": "now"
-  },
+  "time": { "from": "now-1h", "to": "now" },
   "overwrite": true
 }
 ````
 
-Na outra pasta, provisioning temos dois arquivos. Datasource.yml e dashboard.yml que são responsáveis por automatizar a configuração de dashboards e fontes de dados. Eles permitem que você configure essas opções automaticamente durante a inicialização do Grafana, em vez de configurá-las manualmente pela interface do usuário.
-datasource.yml
-Contém arquivos YML para configurar datasources (fontes de dados), como Prometheus, MySQL, Elasticsearch, entre outros.
+Na outra pasta, provisioning temos dois arquivos. `datasource.yml` e `dashboard.yml` que são responsáveis por automatizar a configuração de dashboards e fontes de dados. Eles permitem que você configure essas opções automaticamente durante a inicialização do Grafana, em vez de configurá-las manualmente pela interface do usuário.
+`datasource.yml`É aquele que contém arquivos YML para configurar datasources (fontes de dados), como Prometheus, MySQL, Elasticsearch, entre outros.
 ````
 apiVersion: 1  # Versão da API utilizada para configuração do Grafana
 
@@ -485,8 +374,7 @@ datasources:
 
 ````
 
-dashboards.yml
-Contém arquivos YML para provisionar dashboards, especificando onde estão os arquivos JSON com as definições dos dashboards.
+`dashboards.yml` É aquele que contém arquivos YML para provisionar dashboards, especificando onde estão os arquivos JSON com as definições dos dashboards.
 
 ````
 apiVersion: 1
@@ -501,18 +389,34 @@ providers:
     options:
       path: /var/lib/grafana/dashboards
 ````
+Na pasta `prometheus`, temos o arquivo `prometheus.yml`, que contém a configuração principal do Prometheus. Nesse arquivo, são definidas as configurações para:
 
-Na pasta prometheus temos o arquivo prometheus.yml que é responsável pela configuração principal do Prometheus, onde são definidas configurações para:
-1 - Fontes de coleta de métricas (targets).
-2 - Regras de scrape (frequência e comportamento da coleta).
-3 - Alertas (Alertmanager).
-4 - Configurações de armazenamento e outros parâmetros globais.
+1. **Fontes de coleta de métricas (alvos)**: Especificação das fontes de dados que o Prometheus deve monitorar.
+2. **Regras de scrape**: Definição da frequência e comportamento da coleta das métricas.
+3. **Alertas (Alertmanager)**: Configurações para o gerenciamento de alertas, incluindo a integração com o Alertmanager.
+4. **Configurações de armazenamento**: Parâmetros relacionados ao armazenamento de dados e outras configurações globais do Prometheus.
+
+Essas configurações permitem ajustar como o Prometheus coleta, armazena e gerencia as métricas e alertas em seu ambiente.
+````
+global:
+  scrape_interval: 15s  # Coleta de métricas a cada 15 segundos para todos os jobs
+
+scrape_configs:
+  - job_name: 'prometheus'  # Coleta de métricas do Prometheus
+    static_configs:
+      - targets: 
+          - 'localhost:9090'  # Alvo é o próprio Prometheus
+
+  - job_name: 'mysqld_exporter'  # Coleta de métricas do MySQL
+    static_configs:
+      - targets: 
+          - '192.168.100.8:9104'  # Alvo é o MySQL Exporter
+
+````
 
 Outras alterações se fizeram necessárias ao adicionar essas configurações. Alterações no docker-compose e Jenkinsfile.
-Docker-compose.yml
+`docker-compose.yml`
 ``` yml
-version: "3.7"
-
 services:
   flask:
     build:
@@ -521,7 +425,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
+      - FLASK_ENV=development
     depends_on:
       - mariadb
 
@@ -537,19 +441,6 @@ services:
       MYSQL_USER: flask_user
       MYSQL_PASSWORD: flask_password
 
-  test:
-    build:
-      context: ./flask
-      dockerfile: Dockerfile_flask
-    command: ["pytest", "/app/test_app.py"]
-    depends_on:
-      - mariadb
-      - flask
-    environment:
-      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
-    networks:
-      - default
-
   prometheus:
     image: prom/prometheus
     volumes:
@@ -563,10 +454,10 @@ services:
 
   mysqld_exporter:
     image: prom/mysqld-exporter
-    environment:
-      - DATA_SOURCE_NAME=mysql://flask_user:flask_password@mariadb:3306/school_db
     ports:
       - "9104:9104"
+    environment:
+      DATA_SOURCE_NAME: "user:password@(mariadb:3306)/"
     depends_on:
       - mariadb
 
@@ -578,6 +469,19 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
+
+  test:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile_flask
+    command: ["pytest", "/app/test_app.py"]  # Roda os testes no arquivo test_app.py
+    depends_on:
+      - mariadb
+      - flask
+    environment:
+      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
+    networks:
+      - default 
 ```
 
 Jenkinsfile
@@ -585,23 +489,33 @@ Jenkinsfile
 pipeline {
     agent any
 
+    environment {
+        CONTAINER_SERVICES = 'mariadb flask test mysqld_exporter prometheus grafana'
+    }
+
     stages {
         stage('Git Pull & Build Containers') {
             steps {
                 script {
-                    git branch: "main", url: "https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git"
+                    git branch: "master", url: "https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git"
                     sh 'docker-compose down -v'
                     sh 'docker-compose build'
                 }
             }
         }
 
-        stage('Start Containers & Run Tests') {
+        stage('Initialize and Start Containers') {
             steps {
                 script {
-                    sh 'docker-compose up -d mariadb flask test mysqld_exporter prometheus grafana'
-                    sh 'sleep 40' 
+                    sh "docker-compose up -d ${env.CONTAINER_SERVICES}"
+                    sh 'sleep 40'  
+                }
+            }
+        }
 
+        stage('Run Tests') {
+            steps {
+                script {
                     try {
                         sh 'docker-compose run --rm test'
                     } catch (Exception e) {
@@ -615,7 +529,7 @@ pipeline {
         stage('Keep Application Running') {
             steps {
                 script {
-                    sh 'docker-compose up -d mariadb flask test mysqld_exporter prometheus grafana'
+                    sh 'docker-compose up -d'
                 }
             }
         }
@@ -631,7 +545,5 @@ pipeline {
 
 Após isso tivemos o dashboard funcionando de forma automatizada a partir de métricas do prometheus.
 ![image](imagens/Grafana.PNG)
-
-![image](imagens/Grafana2.PNG)
 
 
