@@ -591,10 +591,10 @@ Acesse o endereço: `http://localhost:8080`.
    - Acesse a página inicial do Jenkins e localize o pipeline recém-criado.
 
    - Clique no pipeline e, em seguida, selecione a opção **"Construir Agora"** para dar início à execução.
-       
-   - Monitore os logs em tempo real para verificar o progresso.
-      
+         
    ![Imagem Jenkins](imagens/Jenkins_3.png)
+   - Monitore os logs em tempo real para verificar o progresso.
+   ![Imagem Jenkins](imagens/Jenkins_4.png)
 
 - **Grafana**:
 Acesse o link: `http://localhost:3000`
