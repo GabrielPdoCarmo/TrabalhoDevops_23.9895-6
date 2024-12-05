@@ -1,72 +1,92 @@
-# Trabalho devops
+# **Trabalho DevOps**
 
+### **Aluno**  
+- Gabriel Pereira do Carmo  
+- RA: 23.98.95-6  
 
-### Aluno
-- Gabriel Pereira do Carmo RA: 23.98.95-6
+---
+### Descrição do Projeto
 
-# Rodar Projeto
+Este projeto implementa automaticamente um ambiente de monitoramento utilizando o Grafana, configurado para apresentar um painel que rastreia requisições a partir de um servidor Prometheus. A automação contempla a integração com o Jenkins para o gerenciamento do pipeline de execução.
 
-Para rodar o projeto, é necessário rodar o seguinte comando
-```bash
-docker-compose up --build
-```
-Caso venha ocorrer alguns erro, peço que rode novamente o comando acima
+---
+## **Iniciando o Projeto**
 
-####  Inicio do projeto
-O arquivo docker-compose.yml foi criado na raiz do projeto para configurar os contêineres necessários.
+1. **Comando para rodar o projeto**  
+   Para iniciar os serviços, execute:  
+   ```bash
+   docker-compose up --build
+   ```  
+   Caso algum erro ocorra ou não puxe todos os dados, tente novamente o comando acima.
+---
 
-```bash
-nano docker-compose.yml
-```
-Após isso adicionei o seguinte código dentro do arquivo:
+## **Arquitetura do Projeto**
 
-``` yml
-version: '3.7'
+Este projeto utiliza uma estrutura baseada em contêineres para integrar os seguintes serviços:  
 
-services:
-  mariadb:
-    build:
-      context: ./mariadb
-      dockerfile: Dockerfile_mariadb
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: school_db
-      MYSQL_USER: flask_user
-      MYSQL_PASSWORD: flask_password
+- **MariaDB**: Banco de dados relacional.  
+- **Flask**: Backend para APIs e interface administrativa.  
+- **Grafana**: Painel de visualização de métricas.  
+- **Prometheus**: Monitoramento e coleta de métricas.  
+- **Jenkins**: Automação do pipeline CI/CD.  
 
-  flask:
-    build:
-      context: ./flask
-      dockerfile: Dockerfile_flask
-    ports:
-      - "5000:5000"
-    environment:
-      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
-    depends_on:
-      - mariadb
+A configuração dos serviços está centralizada no arquivo `docker-compose.yml`.
 
-  test:
-    build:
-      context: ./flask
-      dockerfile: Dockerfile_flask
-    command: ["pytest", "/app/test_app.py"]  # Roda os testes no arquivo test_app.py
-    depends_on:
-      - mariadb
-      - flask
-    environment:
-      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
-    networks:
-      - default  # Conecta o contêiner aos mesmos serviços de rede
+### **Estrutura de Pastas**  
+
+```plaintext
+`├── Jenkinsfile                          # Define a pipeline de CI/CD do Jenkins
+├── docker-compose.yml
+├── grafana/
+│   ├── provisioning/
+│   │   ├── datasource.yml          # Configuração de fonte de dados para o Grafana
+│   │   ├── dashboard.yml           # Configuração para provisionamento automático de dashboards
+│   └── dashboards/
+│       └── mariadb_dashboard.json  # JSON exportado da dashboard do Grafana para MariaDB
+├── prometheus/
+│   └── prometheus.yml              # Arquivo de configuração do Prometheus
+├── mariadb/
+│   └── Dockerfile_mariadb          # Dockerfile do MariaDB
+├── flask/
+│   ├── app.py                      # Código principal da aplicação Flask
+│   ├── Dockerfile_flask            # Dockerfile do Flask
+│   ├── requirements.txt            # Dependências da aplicação Flask
+│   ├── test_app.py             # Arquivo de testes unitários da aplicação Flask
+└── exporter/
+    └── mysqld_exporter.env         # Arquivo de configuração/env do MySQL Exporter
 ```
 
-Após, criei uma pasta chamada `flask`, onde dentro crie o arquivo `app.py`.
+---
+
+## **Configurações dos Serviços**
+
+### **1. Banco de Dados: MariaDB**
+Criar Pasta: `mariadb`
+
+Arquivo: `Dockerfile_mariadb`  
+```dockerfile
+# Dockerfile para MariaDB
+# Salve este arquivo como Dockerfile.mariadb na raiz do projeto
+
+# Dockerfile (MariaDB)
+FROM mariadb:10.5
+
+# Defina as variáveis de ambiente para o banco de dados
+ENV MYSQL_ROOT_PASSWORD=root_password
+ENV MYSQL_DATABASE=school_db
+ENV MYSQL_USER=flask_user
+ENV MYSQL_PASSWORD=flask_password
+
+EXPOSE 3306
 ```
-nano app.py 
-```
-em seguinda, foi colocado o seguinte código:
-``` python
+
+---
+
+### **2. Backend: Flask**
+Pasta: `flask`
+
+Arquivo: `app.py`  
+```python
 # Código principal do Flask (app.py)
 import time
 from flask import Flask, request, jsonify
@@ -165,15 +185,10 @@ def adicionar_aluno():
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 ```
+Pasta: `flask`
 
-Após adicionei as dependencias da aplicação por meio do arquivo `requirements`, que ficou dentro da pasta `flask` também.
-
-```bash
-nano requirements.txt
-```
-
-e adicionei o seguinte código dentro:
-```txt
+Arquivo: `requirements.txt`  
+```plaintext
 Flask==1.1.4  # Versão compatível com Flask-AppBuilder
 Flask-SQLAlchemy==2.4.4  # Extensão do Flask para integração com SQLAlchemy
 PyMySQL==0.9.3  # Biblioteca para conexão do Python com o banco de dados MariaDB
@@ -186,15 +201,10 @@ pytest==6.2.5
 pytest-flask==1.2.0
 Flask-Testing==0.8.0
 ```
-Após criei o `Dockerfile_flask` dentro da pasta `flask` também, onde ele vai determinar o diretorio de trabalho e rodar a instalação das dependencias
+Pasta: `flask`
 
-``` bash
-vim Dockerfile_flask
-```
-
-e em seguida o seguinte código foi adicionado dentro:
-
-``` yml
+Arquivo: `Dockerfile_flask`  
+```dockerfile
 # Dockerfile (Flask AppBuilder)
 FROM python:3.9-slim
 
@@ -203,83 +213,131 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-#COPY . .
+# Copiar o arquivo app.py
 COPY app.py /app/
 
+# Copiar também o arquivo de teste test_app.py
+COPY test_app.py /app/
+
 CMD ["flask", "run", "--host=0.0.0.0"]
-
 ```
+Pasta: `flask`
 
-Em seguida, na raiz do projeto, criei a pasta `mariadb` e adicionei o arquivo `Dockerfile_mariadb`, responsável por definir as variáveis de ambiente necessárias para o funcionamento do projeto.
+Arquivo: `test_app.py`
 
-```nano
-nano Dockerfile_mariadb
+````
+import pytest
+from flask import Flask
+from flask.testing import FlaskClient
+
+# Importar a aplicação Flask
+from app import app  # Assumindo que seu arquivo principal é app.py
+
+@pytest.fixture
+def client():
+    with app.test_client() as client:
+        yield client
+
+def test_listar_alunos(client: FlaskClient):
+    """Testa a rota GET /alunos"""
+    response = client.get('/alunos')
+    assert response.status_code == 200
+    assert isinstance(response.json, list)
+
+def test_adicionar_aluno(client: FlaskClient):
+    """Testa a rota POST /alunos"""
+    new_aluno = {
+        "nome": "Gabriel",
+        "sobrenome": "Pereira",
+        "turma": "9A",
+        "disciplinas": "Matemática, Física",
+        "ra": "12345"
+    }
+    response = client.post('/alunos', json=new_aluno)
+    assert response.status_code == 201
+    assert response.json['message'] == 'Aluno adicionado com sucesso!'
+    
+````
+---
+
+### **3. Monitoramento: Prometheus e Grafana**
+Pasta: `prometheus`
+
+Arquivo: `prometheus.yml`  
+```yaml
+global:
+  scrape_interval: 15s  # Coleta de métricas a cada 15 segundos para todos os jobs
+
+scrape_configs:
+  - job_name: 'prometheus'  # Coleta de métricas do Prometheus
+    static_configs:
+      - targets: 
+          - 'localhost:9090'  # Alvo é o próprio Prometheus
+
+  - job_name: 'mysqld_exporter'  # Coleta de métricas do MySQL
+    static_configs:
+      - targets: 
+          - '192.168.100.8:9104'  # Alvo é o MySQL Exporter
 ```
+Pasta: `grafana/provisioning`
 
-Foi colocado o seguinte código: 
+Arquivo: `datasource.yml`  
+```yaml
+apiVersion: 1 
 
-```  yml
-# Dockerfile para MariaDB
-# Salve este arquivo como Dockerfile.mariadb na raiz do projeto
-
-# Dockerfile (MariaDB)
-FROM mariadb:10.5
-
-# Defina as variáveis de ambiente para o banco de dados
-ENV MYSQL_ROOT_PASSWORD=root_password
-ENV MYSQL_DATABASE=school_db
-ENV MYSQL_USER=flask_user
-ENV MYSQL_PASSWORD=flask_password
-
-EXPOSE 3306
+datasources:
+  - name: Prometheus 
+    type: prometheus  
+    access: proxy  
+    url: http://prometheus:9090  
+    isDefault: true  
+    jsonData:
+      timeInterval: 5s  
 ```
+Pasta: `grafana/provisioning`
 
+Arquivo: `dashboard.yml`  
+```yaml
+apiVersion: 1
 
+providers:
+  - name: 'MariaDB Dashboards'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards
+```
+Pasta: `grafana`
 
-- Ao confeir no navegador o localhost:5000 obitive a resultado correto:
+Arquivo: `Dockerfile_grafana`
 
-![alt text](imagens/FAB.png)
-
-#### Configuração do Jenkins
-Nesta etapa, eu criei uma nova tarefa no Jenkins, que será utilizada para gerenciar o pipeline do projeto "trabalho devOps". Primeiro, defini o nome do item como "trabalho devOps". Em seguida, escolhi o tipo de tarefa como "Pipeline", pois é o mais indicado para projetos que exigem a execução de processos complexos e sequenciais, como o fluxo de integração e entrega contínua (CI/CD). Depois de selecionar o tipo de tarefa, cliquei no botão "Confirmar" para prosseguir com a configuração do pipeline.
-
-![alt text](imagens/Jenkins_1.png)
-
-Em seguida, configurei o pipeline no Jenkins para conectar ao repositório Git onde está armazenado o código do projeto "Trabalho DevOps".
-
-No campo SCM, selecionei Git como o sistema de controle de versão.  
-No campo Repository URL, inseri o link para o repositório do GitHub: https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git.  
-Como não foram configuradas credenciais específicas, deixei o campo Credentials como - none -. Caso o repositório fosse privado, seria necessário adicionar credenciais para autenticação.  
-
-No campo Branches to build, especifiquei a branch que seria usada para as builds, no caso */master. Isso indica que o pipeline será executado na branch principal.
-
-![alt text](imagens/Jenkins_2.png)
-
-### Desenvolvimento do Grafana e Prometheus
-Adicionada as pastas grafana e prometheus aos arquivos.
-Na pasta `grafana` o arquivo `Dockerfile_grafana` fica responsável por crir a imagem Docker personalizada para o serviço Grafana. Ela define como configurar o ambiente, adicionando configurações específicas, plugins e integrações necessárias para funcionar no contexto da aplicação.
-Código:
-```  yml
+````
 FROM grafana/grafana:latest
 
 USER root
 
+# Certifique-se de que o diretório `provisioning/datasources` e `provisioning/dashboards` existem
 RUN mkdir /var/lib/grafana/dashboards
 
+# Copiar os arquivos para o diretório correto
 COPY provisioning/datasource.yml /etc/grafana/provisioning/datasources/
 COPY provisioning/dashboard.yml /etc/grafana/provisioning/dashboards/
 COPY dashboards/mariadb_dashboard.json /var/lib/grafana/dashboards/
 
+# Garantir permissões para o usuário grafana
 RUN chown -R 472:472 /etc/grafana/provisioning
 
 USER grafana
-```
-Na pasta `dashboards` do Grafana, temos o arquivo responsável por um dashboard pré-configurado, que contém a definição de painéis e métricas específicas para monitorar um banco de dados MariaDB. Ele define os painéis, as métricas monitoradas e a integração com os datasources.
-Arquivo:
-`mariadb_dashboard.json`
+````
+Pasta: `grafana/dashboards`
+
+Arquivo: `mariadb_dashboard.json`
 
 ````
- {
+{
   "uid": "simple_dashboard",
   "title": "Desempenho HTTP - Métricas Padrão",
   "tags": ["HTTP", "Prometheus", "Desempenho"],
@@ -357,66 +415,75 @@ Arquivo:
   "overwrite": true
 }
 ````
+---
 
-Na outra pasta, provisioning temos dois arquivos. `datasource.yml` e `dashboard.yml` que são responsáveis por automatizar a configuração de dashboards e fontes de dados. Eles permitem que você configure essas opções automaticamente durante a inicialização do Grafana, em vez de configurá-las manualmente pela interface do usuário.
-`datasource.yml`É aquele que contém arquivos YML para configurar datasources (fontes de dados), como Prometheus, MySQL, Elasticsearch, entre outros.
-````
-apiVersion: 1  # Versão da API utilizada para configuração do Grafana
+## **Pipeline CI/CD: Jenkins**
 
-datasources:
-  - name: Prometheus  # Nome da fonte de dados que será adicionada no Grafana
-    type: prometheus  # Tipo da fonte de dados, neste caso, Prometheus
-    access: proxy  # Tipo de acesso, 'proxy' significa que as requisições passarão pelo backend do Grafana
-    url: http://prometheus:9090  # URL para acessar o Prometheus dentro da rede do Docker
-    isDefault: true  # Define esta fonte de dados como a padrão no Grafana
-    jsonData:
-      timeInterval: 5s  # Intervalo de tempo padrão para coleta de dados
+Arquivo: `Jenkinsfile`  
+```bash
+pipeline {
+    agent any
 
-````
+    environment {
+        CONTAINER_SERVICES = 'mariadb flask test mysqld_exporter prometheus grafana'
+    }
 
-`dashboards.yml` É aquele que contém arquivos YML para provisionar dashboards, especificando onde estão os arquivos JSON com as definições dos dashboards.
+    stages {
+        stage('Git Pull & Build Containers') {
+            steps {
+                script {
+                    git branch: "master", url: "https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git"
+                    sh 'docker-compose down -v'
+                    sh 'docker-compose build'
+                }
+            }
+        }
 
-````
-apiVersion: 1
+        stage('Initialize and Start Containers') {
+            steps {
+                script {
+                    sh "docker-compose up -d ${env.CONTAINER_SERVICES}"
+                    sh 'sleep 40'  
+                }
+            }
+        }
 
-providers:
-  - name: "MariaDB Dashboards"
-    orgId: 1
-    folder: ""
-    type: file
-    disableDeletion: false
-    editable: true
-    options:
-      path: /var/lib/grafana/dashboards
-````
-Na pasta `prometheus`, temos o arquivo `prometheus.yml`, que contém a configuração principal do Prometheus. Nesse arquivo, são definidas as configurações para:
+        stage('Run Tests') {
+            steps {
+                script {
+                    try {
+                        sh 'docker-compose run --rm test'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Testes falharam. Pipeline interrompido."
+                    }
+                }
+            }
+        }
 
-1. **Fontes de coleta de métricas (alvos)**: Especificação das fontes de dados que o Prometheus deve monitorar.
-2. **Regras de scrape**: Definição da frequência e comportamento da coleta das métricas.
-3. **Alertas (Alertmanager)**: Configurações para o gerenciamento de alertas, incluindo a integração com o Alertmanager.
-4. **Configurações de armazenamento**: Parâmetros relacionados ao armazenamento de dados e outras configurações globais do Prometheus.
+        stage('Keep Application Running') {
+            steps {
+                script {
+                    sh 'docker-compose up -d'
+                }
+            }
+        }
+    }
 
-Essas configurações permitem ajustar como o Prometheus coleta, armazena e gerencia as métricas e alertas em seu ambiente.
-````
-global:
-  scrape_interval: 15s  # Coleta de métricas a cada 15 segundos para todos os jobs
+    post {
+        failure {
+            sh 'docker-compose down -v'
+        }
+    }
+}
+```
 
-scrape_configs:
-  - job_name: 'prometheus'  # Coleta de métricas do Prometheus
-    static_configs:
-      - targets: 
-          - 'localhost:9090'  # Alvo é o próprio Prometheus
+---
 
-  - job_name: 'mysqld_exporter'  # Coleta de métricas do MySQL
-    static_configs:
-      - targets: 
-          - '192.168.100.8:9104'  # Alvo é o MySQL Exporter
+## **Configuração Docker Compose**
 
-````
-
-Outras alterações se fizeram necessárias ao adicionar essas configurações. Alterações no docker-compose e Jenkinsfile.
-`docker-compose.yml`
-``` yml
+Arquivo: `docker-compose.yml`  
+```yaml
 services:
   flask:
     build:
@@ -484,66 +551,70 @@ services:
       - default 
 ```
 
-Jenkinsfile
-``` yml
-pipeline {
-    agent any
+---
 
-    environment {
-        CONTAINER_SERVICES = 'mariadb flask test mysqld_exporter prometheus grafana'
-    }
+## **Passo a Passo de Execução e Resultados**
+Abaixo estão as imagens que ilustram os resultados do projeto em execução:
 
-    stages {
-        stage('Git Pull & Build Containers') {
-            steps {
-                script {
-                    git branch: "master", url: "https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git"
-                    sh 'docker-compose down -v'
-                    sh 'docker-compose build'
-                }
-            }
-        }
+- **Jenkins**  
+Acesse o endereço: `http://localhost:8080`.  
 
-        stage('Initialize and Start Containers') {
-            steps {
-                script {
-                    sh "docker-compose up -d ${env.CONTAINER_SERVICES}"
-                    sh 'sleep 40'  
-                }
-            }
-        }
+1. **Faça login no Jenkins** com suas credenciais.  
 
-        stage('Run Tests') {
-            steps {
-                script {
-                    try {
-                        sh 'docker-compose run --rm test'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error "Testes falharam. Pipeline interrompido."
-                    }
-                }
-            }
-        }
+2. **Crie um Novo Projeto**:  
+   - Clique em "Nova Tarefa".  
+   - Insira um nome para o pipeline, como **"Trabalho DevOps"**.  
+   - Escolha a opção **"Pipeline"** e clique em **"OK"**.  
 
-        stage('Keep Application Running') {
-            steps {
-                script {
-                    sh 'docker-compose up -d'
-                }
-            }
-        }
-    }
+![Imagem Jenkins](imagens/Jenkins_1.png)  
 
-    post {
-        failure {
-            sh 'docker-compose down -v'
-        }
-    }
-}
-```
+3. **Configurar o Pipeline**:  
+   - Na página de configuração do pipeline, vá até a seção **"Build Triggers"**.  
+   - Ative a opção **"Consultar periodicamente o SCM"**.  
+   - Adicione o seguinte cronograma para que o Jenkins verifique o repositório regularmente: `H/5 * * * *`.  
 
-Após isso tivemos o dashboard funcionando de forma automatizada a partir de métricas do prometheus.
-![image](imagens/Grafana.PNG)
+4. **Definir o Script do Pipeline**:  
+   - Role até a seção **"Pipeline"**.  
+   - Selecione **"Pipeline Script from SCM"**.  
+
+![Imagem Jenkins](imagens/Jenkins_2.png)  
+
+5. **Configurar o Repositório Git**:  
+   - No campo **SCM**, escolha **"Git"**.  
+   - Informe o endereço do repositório do projeto:  
+     `https://github.com/GabrielPdoCarmo/TrabalhoDevops_23.9895-6.git`.  
+
+6. **Salvar as Alterações**:  
+   - Clique em **Salvar** para finalizar a configuração.  
+
+7. **Executar o Pipeline**  
+   - Acesse a página inicial do Jenkins e localize o pipeline recém-criado.
+
+   - Clique no pipeline e, em seguida, selecione a opção **"Construir Agora"** para dar início à execução.
+       
+   - Monitore os logs em tempo real para verificar o progresso.
+      
+   ![Imagem Jenkins](imagens/Jenkins_3.png)
+
+- **Grafana**:
+Acesse o link: `http://localhost:3000`
+
+Faça login no Grafana:
+
+- Usuário: admin
+- Senha: admin 
+
+Verifique a dashboard provisionado automaticamente e visualize as métricas de requisições.
+
+![Dashboard](imagens/Grafana.PNG)
+
+- **Flask**
+
+Acesse o link: ` http://localhost:5000 `
+![Imagem do Fab funcionando](imagens/FAB.png)
+
+- Clice em Alunos, assim podera visualizar os alunos criados pelo teste
+![Imagem do Fab funcionando](imagens/FAB_2.png)
 
 
+---
